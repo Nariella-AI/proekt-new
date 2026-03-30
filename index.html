@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Калькулятор стоимости услуг</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: #111a2e;
+        --card-2: #0f172a;
+        --text: #e8eefc;
+        --muted: rgba(232, 238, 252, 0.72);
+        --border: rgba(232, 238, 252, 0.12);
+        --accent: #6ea8fe;
+        --danger: #ff6b6b;
+        --success: #2dd4bf;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          "Noto Sans", "Liberation Sans", sans-serif;
+        background: radial-gradient(1000px 700px at 20% 0%, rgba(110, 168, 254, 0.18), transparent),
+          radial-gradient(900px 600px at 80% 15%, rgba(45, 212, 191, 0.12), transparent),
+          var(--bg);
+        color: var(--text);
+      }
+
+      .wrap {
+        max-width: 980px;
+        margin: 28px auto;
+        padding: 0 16px 40px;
+      }
+
+      header {
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 750;
+        letter-spacing: 0.2px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.0));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .card .inner {
+        padding: 14px;
+      }
+
+      .card h2 {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 160px;
+        gap: 10px;
+        align-items: end;
+      }
+
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 160px 160px;
+        gap: 10px;
+        align-items: end;
+      }
+
+      @media (max-width: 560px) {
+        .row,
+        .row-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      input,
+      button,
+      select {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(17, 26, 46, 0.65);
+        color: var(--text);
+        padding: 10px 12px;
+        outline: none;
+      }
+
+      input::placeholder {
+        color: rgba(232, 238, 252, 0.45);
+      }
+
+      input:focus,
+      select:focus {
+        border-color: rgba(110, 168, 254, 0.55);
+        box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.18);
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .actions button {
+        width: auto;
+        flex: 1;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .btn-primary {
+        background: linear-gradient(180deg, rgba(110, 168, 254, 0.95), rgba(110, 168, 254, 0.75));
+        border-color: rgba(110, 168, 254, 0.35);
+      }
+
+      .btn-secondary {
+        background: rgba(17, 26, 46, 0.4);
+      }
+
+      .btn-danger {
+        background: rgba(255, 107, 107, 0.12);
+        border-color: rgba(255, 107, 107, 0.3);
+        color: #ffd7d7;
+      }
+
+      .mini {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .item {
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .item .title {
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+
+      .item .meta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .price {
+        text-align: right;
+        font-weight: 900;
+        letter-spacing: 0.2px;
+      }
+
+      .item-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        justify-content: flex-end;
+      }
+
+      .icon-btn {
+        width: auto;
+        padding: 8px 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 800;
+        border: 1px solid var(--border);
+        background: rgba(17, 26, 46, 0.35);
+      }
+
+      .icon-btn.danger {
+        border-color: rgba(255, 107, 107, 0.35);
+        color: #ffd7d7;
+        background: rgba(255, 107, 107, 0.12);
+      }
+
+      .totals {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .total-line {
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(17, 26, 46, 0.35);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .total-label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .total-value {
+        font-size: 18px;
+        font-weight: 950;
+      }
+
+      .estimate {
+        width: 100%;
+        min-height: 240px;
+        resize: vertical;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+
+      .hint {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .status {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(17, 26, 46, 0.45);
+        color: var(--muted);
+        font-size: 12.5px;
+        min-height: 18px;
+      }
+
+      @media print {
+        body {
+          background: #fff;
+          color: #000;
+        }
+        .card {
+          border: 1px solid #ddd;
+          box-shadow: none;
+        }
+        .card .inner {
+          padding: 10px;
+        }
+        .actions,
+        .list .item-actions,
+        header .subtitle,
+        .status,
+        .mini,
+        .hint {
+          display: none !important;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .estimate {
+          background: transparent;
+          border: 1px solid #ddd;
+          min-height: unset;
+          resize: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>Калькулятор стоимости услуг</h1>
+          <div class="subtitle">Добавляйте позиции, удаляйте и собирайте мини-смету клиенту.</div>
+        </div>
+        <div class="mini">Данные сохраняются в этом браузере.</div>
+      </header>
+
+      <div class="grid">
+        <section class="card">
+          <div class="inner">
+            <h2>Позиции</h2>
+
+            <div class="row-2">
+              <div>
+                <label for="serviceName">Название услуги</label>
+                <input id="serviceName" type="text" placeholder="Например: Разработка лендинга" />
+              </div>
+              <div>
+                <label for="qty">Кол-во</label>
+                <input id="qty" type="number" min="1" step="1" value="1" />
+              </div>
+              <div>
+                <label for="price">Цена за 1</label>
+                <input id="price" type="number" min="0" step="0.01" placeholder="Например: 1500" />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn-primary" id="addBtn" type="button">Добавить</button>
+              <button class="btn-secondary" id="clearBtn" type="button">Очистить</button>
+            </div>
+
+            <div class="hint">
+              Совет: после добавления нажмите кнопку “Скопировать смету” справа.
+            </div>
+
+            <div style="height: 12px"></div>
+
+            <ul class="list" id="itemsList"></ul>
+            <div id="emptyState" class="status" style="display: none">
+              Пока нет позиций. Добавьте первую услугу слева.
+            </div>
+          </div>
+        </section>
+
+        <aside class="card">
+          <div class="inner">
+            <h2>Мини-смета для клиента</h2>
+
+            <div class="row" style="margin-bottom: 10px">
+              <div>
+                <label for="clientName">Клиент (необязательно)</label>
+                <input id="clientName" type="text" placeholder="Например: ООО Ромашка" />
+              </div>
+              <div>
+                <label for="currency">Валюта</label>
+                <select id="currency">
+                  <option value="RUB" selected>RUB (₽)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="totals">
+              <div class="total-line">
+                <div class="total-label">Итого</div>
+                <div class="total-value" id="totalValue">—</div>
+              </div>
+            </div>
+
+            <div style="height: 10px"></div>
+
+            <label for="estimateText">Текст сметы</label>
+            <textarea class="estimate" id="estimateText" spellcheck="false" readonly></textarea>
+
+            <div class="actions" style="margin-top: 10px">
+              <button class="btn-primary" id="copyBtn" type="button">Скопировать смету</button>
+              <button class="btn-secondary" id="printBtn" type="button">Печать</button>
+            </div>
+
+            <div class="status" id="statusBox" aria-live="polite"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "freelancer_estimate_v1";
+
+      /** @type {{id:string, name:string, qty:number, price:number}[]} */
+      let items = [];
+
+      const $ = (id) => document.getElementById(id);
+
+      const serviceName = $("serviceName");
+      const qtyEl = $("qty");
+      const priceEl = $("price");
+      const itemsList = $("itemsList");
+      const emptyState = $("emptyState");
+      const addBtn = $("addBtn");
+      const clearBtn = $("clearBtn");
+
+      const clientName = $("clientName");
+      const currency = $("currency");
+      const totalValue = $("totalValue");
+      const estimateText = $("estimateText");
+      const copyBtn = $("copyBtn");
+      const printBtn = $("printBtn");
+      const statusBox = $("statusBox");
+
+      function safeParseNumber(value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : NaN;
+      }
+
+      function formatMoney(amount) {
+        const curr = currency.value || "RUB";
+        try {
+          return new Intl.NumberFormat("ru-RU", {
+            style: "currency",
+            currency: curr,
+            maximumFractionDigits: 2,
+          }).format(amount);
+        } catch {
+          // На случай отсутствия поддержки валюты.
+          return `${amount.toFixed(2)} ${curr}`;
+        }
+      }
+
+      function uid() {
+        if (crypto && crypto.randomUUID) return crypto.randomUUID();
+        return `id_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+      }
+
+      function getTotal() {
+        return items.reduce((acc, it) => acc + it.qty * it.price, 0);
+      }
+
+      function buildEstimateText() {
+        const curr = currency.value || "RUB";
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("ru-RU");
+        const headerClient = clientName.value.trim() ? `Клиент: ${clientName.value.trim()}` : "Клиент: —";
+        const lines = [];
+
+        lines.push("МИНИ-СМЕТА");
+        lines.push(headerClient);
+        lines.push(`Дата: ${dateStr}`);
+        lines.push("");
+        lines.push("Позиции:");
+
+        if (!items.length) {
+          lines.push("—");
+        } else {
+          items.forEach((it, idx) => {
+            const lineTotal = it.qty * it.price;
+            const pricePer = formatMoney(it.price);
+            const lineTotalStr = formatMoney(lineTotal);
+            const name = it.name;
+            if (it.qty === 1) {
+              lines.push(`${idx + 1}. ${name} — ${pricePer} = ${lineTotalStr}`);
+            } else {
+              lines.push(`${idx + 1}. ${name} — ${it.qty} × ${pricePer} = ${lineTotalStr}`);
+            }
+          });
+        }
+
+        lines.push("");
+        const total = getTotal();
+        lines.push(`Итого: ${formatMoney(total)}`);
+        lines.push(`Валюта: ${curr}`);
+        return lines.join("\n");
+      }
+
+      function persist() {
+        const payload = {
+          items,
+          clientName: clientName.value,
+          currency: currency.value,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      }
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed.items)) items = parsed.items;
+          if (typeof parsed.clientName === "string") clientName.value = parsed.clientName;
+          if (typeof parsed.currency === "string") currency.value = parsed.currency;
+        } catch {
+          // ignore
+        }
+      }
+
+      function renderItems() {
+        itemsList.innerHTML = "";
+        if (!items.length) {
+          emptyState.style.display = "block";
+          totalValue.textContent = "—";
+          estimateText.value = buildEstimateText();
+          return;
+        }
+        emptyState.style.display = "none";
+
+        items.forEach((it) => {
+          const lineTotal = it.qty * it.price;
+          const li = document.createElement("li");
+          li.className = "item";
+
+          li.innerHTML = `
+            <div>
+              <div class="title"></div>
+              <div class="meta"></div>
+              <div class="item-actions"></div>
+            </div>
+            <div>
+              <div class="price"></div>
+            </div>
+          `;
+
+          li.querySelector(".title").textContent = it.name;
+          li.querySelector(".meta").textContent =
+            it.qty === 1
+              ? `Цена: ${formatMoney(it.price)}`
+              : `Цена: ${formatMoney(it.price)} • Кол-во: ${it.qty}`;
+
+          li.querySelector(".price").textContent = formatMoney(lineTotal);
+
+          const actions = li.querySelector(".item-actions");
+          const delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "icon-btn danger";
+          delBtn.textContent = "Удалить";
+          delBtn.addEventListener("click", () => removeItem(it.id));
+          actions.appendChild(delBtn);
+
+          itemsList.appendChild(li);
+        });
+
+        totalValue.textContent = formatMoney(getTotal());
+        estimateText.value = buildEstimateText();
+      }
+
+      function setStatus(text) {
+        statusBox.textContent = text || "";
+      }
+
+      function addItem() {
+        const name = serviceName.value.trim();
+        const qty = Math.floor(safeParseNumber(qtyEl.value));
+        const price = safeParseNumber(priceEl.value);
+
+        if (!name) {
+          setStatus("Введите название услуги.");
+          serviceName.focus();
+          return;
+        }
+        if (!Number.isFinite(qty) || qty < 1) {
+          setStatus("Введите корректное количество (минимум 1).");
+          qtyEl.focus();
+          return;
+        }
+        if (!Number.isFinite(price) || price < 0) {
+          setStatus("Введите корректную цену (0 и выше).");
+          priceEl.focus();
+          return;
+        }
+
+        const newItem = { id: uid(), name, qty, price };
+        items.push(newItem);
+
+        serviceName.value = "";
+        qtyEl.value = "1";
+        priceEl.value = "";
+
+        setStatus("");
+        persist();
+        renderItems();
+      }
+
+      function removeItem(id) {
+        items = items.filter((it) => it.id !== id);
+        persist();
+        renderItems();
+      }
+
+      function clearAll() {
+        if (!items.length) {
+          setStatus("Список уже пуст.");
+          return;
+        }
+        const ok = confirm("Очистить все позиции? Это действие нельзя отменить.");
+        if (!ok) return;
+        items = [];
+        persist();
+        renderItems();
+        setStatus("");
+      }
+
+      async function copyEstimate() {
+        const text = estimateText.value.trim();
+        if (!text) {
+          setStatus("Сначала добавьте позиции.");
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+          setStatus("Смета скопирована в буфер обмена.");
+        } catch {
+          // Fallback для браузеров без clipboard API.
+          estimateText.focus();
+          estimateText.select();
+          document.execCommand("copy");
+          setStatus("Смета скопирована (режим совместимости).");
+        }
+      }
+
+      function wireEvents() {
+        addBtn.addEventListener("click", addItem);
+        clearBtn.addEventListener("click", clearAll);
+        copyBtn.addEventListener("click", copyEstimate);
+        printBtn.addEventListener("click", () => window.print());
+
+        // Enter = добавить позицию
+        [serviceName, qtyEl, priceEl].forEach((el) => {
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addItem();
+            }
+          });
+        });
+
+        clientName.addEventListener("input", () => {
+          persist();
+          estimateText.value = buildEstimateText();
+        });
+
+        currency.addEventListener("change", () => {
+          persist();
+          renderItems();
+        });
+      }
+
+      // Init
+      load();
+      wireEvents();
+      renderItems();
+    </script>
+  </body>
+</html>
+
